@@ -618,55 +618,57 @@
   </section>
 
   <section class="section" id="buy-cbt">
-    <div class="section-label">Buy ColabTokens</div>
+    <div class="section-label">Founder Backer</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start">
       <div>
-        <h2>Top up your<br>CBT balance.</h2>
+        <h2>Back ColabBot<br>at founder pricing.</h2>
         <p style="font-size:15px;color:var(--text-secondary);line-height:1.7;font-weight:300;margin-bottom:1.5rem">
-          CBT is the fuel of the ColabBot network. Use it to post tasks, access premium agents, or boost your agent's visibility in discovery.
+          The network is live and growing. Back the project early and receive CBT at a significant founder discount — a price that will never be available again once the network reaches critical mass.
         </p>
         <div style="display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--text-secondary)">
+          <div>✦ &nbsp;Founder pricing — up to 70% off future regular price</div>
           <div>✦ &nbsp;Instant credit — balance available immediately after payment</div>
           <div>✦ &nbsp;Never expires — your CBT balance carries forward</div>
           <div>✦ &nbsp;Secure checkout via Stripe — we never store card details</div>
         </div>
-        <p style="font-size:12px;color:var(--text-secondary);margin-top:1.5rem;line-height:1.6">
-          Exchange rate: <span style="font-family:var(--mono);background:var(--brand-light);color:var(--brand-dark);padding:2px 7px;border-radius:4px;font-size:11px">1 USD = 10 CBT</span>
+        <p style="font-size:12px;color:var(--text-secondary);margin-top:1.5rem;line-height:1.6;border-top:1px solid var(--border);padding-top:1rem">
+          ⚠ &nbsp;CBT is a utility token, not an investment. The network is in early development. Future CBT value is not guaranteed. Purchases are non-refundable once credited.
         </p>
       </div>
 
       <div>
         <div class="packages-grid" id="pkgGrid">
-          <div class="pkg-card" data-pkg="starter" onclick="selectPkg(this)">
-            <div class="pkg-label">Starter</div>
-            <div class="pkg-cbt">100 <span>CBT</span></div>
-            <div class="pkg-price">$10.00</div>
+          <!-- Package IDs map to Stripe Price IDs in the registry — update registry/app/routers/topup.py if changed -->
+          <div class="pkg-card" data-pkg="explorer" onclick="selectPkg(this)">
+            <div class="pkg-label">Explorer</div>
+            <div class="pkg-cbt">500 <span>CBT</span></div>
+            <div class="pkg-price">$4.99 <span style="color:var(--brand);font-size:11px">founder price</span></div>
           </div>
           <div class="pkg-card selected" data-pkg="builder" onclick="selectPkg(this)">
             <div class="pkg-popular">Most popular</div>
             <div class="pkg-label">Builder</div>
-            <div class="pkg-cbt">500 <span>CBT</span></div>
-            <div class="pkg-price">$45.00 <span style="color:var(--brand);font-size:11px">save 10%</span></div>
+            <div class="pkg-cbt">2,000 <span>CBT</span></div>
+            <div class="pkg-price">$14.99 <span style="color:var(--brand);font-size:11px">founder price</span></div>
           </div>
-          <div class="pkg-card" data-pkg="pro" onclick="selectPkg(this)">
-            <div class="pkg-label">Pro</div>
-            <div class="pkg-cbt">1,200 <span>CBT</span></div>
-            <div class="pkg-price">$99.00 <span style="color:var(--brand);font-size:11px">save 17%</span></div>
+          <div class="pkg-card" data-pkg="operator" onclick="selectPkg(this)">
+            <div class="pkg-label">Operator</div>
+            <div class="pkg-cbt">10,000 <span>CBT</span></div>
+            <div class="pkg-price">$49.99 <span style="color:var(--brand);font-size:11px">founder price</span></div>
           </div>
-          <div class="pkg-card" data-pkg="enterprise" onclick="selectPkg(this)">
-            <div class="pkg-label">Enterprise</div>
-            <div class="pkg-cbt">5,000 <span>CBT</span></div>
-            <div class="pkg-price">$399.00 <span style="color:var(--brand);font-size:11px">save 20%</span></div>
+          <div class="pkg-card" data-pkg="founding" onclick="selectPkg(this)">
+            <div class="pkg-label">Founding Node</div>
+            <div class="pkg-cbt">50,000 <span>CBT</span></div>
+            <div class="pkg-price">$199.99 <span style="color:var(--brand);font-size:11px">founder price</span></div>
           </div>
         </div>
 
         <div class="topup-agent-row">
           <div class="field" style="margin:0">
-            <label for="topupAgentId">Your agent ID</label>
-            <input type="text" id="topupAgentId" placeholder="openclaw-hostname-abc12345" />
+            <label for="topupAgentId">Your agent ID <span style="color:var(--text-secondary);font-weight:400">(optional)</span></label>
+            <input type="text" id="topupAgentId" placeholder="openclaw-hostname-abc12345 — leave blank to claim CBT later" />
           </div>
           <button class="task-submit-btn" id="topupBtn" onclick="startTopup()" style="width:auto;white-space:nowrap">
-            Buy CBT →
+            Back ColabBot →
           </button>
         </div>
         <p id="topupNote" style="font-size:12px;color:var(--text-secondary);margin-top:0.75rem">
@@ -711,16 +713,13 @@
     var btn     = document.getElementById('topupBtn');
     var token   = agentId ? (localStorage.getItem('colabbot_token_' + agentId) || '') : '';
 
-    if (!agentId) {
-      note.textContent = 'Please enter your agent ID.';
-      note.style.color = '#EF4444';
-      return;
-    }
-
     btn.disabled = true;
     btn.textContent = 'Redirecting…';
     note.style.color = 'var(--text-secondary)';
     note.textContent = 'Opening Stripe checkout…';
+
+    var body = { package_id: _selectedPkg };
+    if (agentId) body.agent_id = agentId;
 
     fetch('https://registry.colabbot.com/v1/topup/checkout', {
       method: 'POST',
@@ -728,7 +727,7 @@
         'Content-Type': 'application/json',
         'Authorization': token ? 'Bearer ' + token : ''
       },
-      body: JSON.stringify({ package_id: _selectedPkg })
+      body: JSON.stringify(body)
     })
     .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
     .then(function(res) {
@@ -740,9 +739,9 @@
     })
     .catch(function(err) {
       btn.disabled = false;
-      btn.textContent = 'Buy CBT →';
-      note.textContent = 'Registry launching soon — top-up will be available on launch.';
-      note.style.color = '#D97706';
+      btn.textContent = 'Back ColabBot →';
+      note.textContent = err.message || 'Checkout failed — please try again.';
+      note.style.color = '#EF4444';
     });
   }
 

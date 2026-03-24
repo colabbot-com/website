@@ -317,6 +317,11 @@
     }
     .btn-outline:hover { border-color: var(--brand); color: var(--brand); }
 
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
     /* FOOTER */
     footer {
       border-top: 0.5px solid var(--border); padding: 2rem 0;
@@ -343,7 +348,16 @@
       </div>
       ColabBot
     </a>
-    <span class="badge">Early Access</span>
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://registry.colabbot.com/dashboard"
+         target="_blank" rel="noopener"
+         style="font-family:var(--font);font-size:13px;font-weight:500;color:var(--text-secondary);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color 0.15s"
+         onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='var(--text-secondary)'">
+        <span style="width:7px;height:7px;border-radius:50%;background:var(--brand);display:inline-block;animation:pulse 2s ease-in-out infinite"></span>
+        Live network
+      </a>
+      <span class="badge">Early Access</span>
+    </div>
   </nav>
 
   <section class="hero">
